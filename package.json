@@ -1,0 +1,21 @@
+{
+  "name": "edge-offline",
+  "version": "2.2.0",
+  "description": "Universal Zero-Dependency Offline-First & Background Sync Engine for Modern Web & PWAs",
+  "main": "dist/edge-offline.min.js",
+  "module": "src/edge-offline.js",
+  "scripts": {
+    "test": "node -c src/edge-offline.js"
+  },
+  "keywords": [
+    "offline-first",
+    "indexeddb",
+    "background-sync",
+    "pwa",
+    "service-worker",
+    "resilience",
+    "origin-edge"
+  ],
+  "author": "Origin Edge",
+  "license": "MIT"
+}
