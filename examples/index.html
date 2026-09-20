@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EdgeOffline Pack — Canlı Test & Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; max-width: 800px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+    .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 9999px; font-weight: bold; font-size: 14px; }
+    .online { background: #065f46; color: #34d399; }
+    .offline { background: #991b1b; color: #f87171; }
+    button { background: #6366f1; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #4f46e5; }
+    pre { background: #090d16; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 13px; color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <h1>⚡ EdgeOffline Pack (v2.2.0)</h1>
+  <p>Çevrimdışı sipariş, arka plan senkronizasyonu ve IndexedDB kuyruk motoru demosu.</p>
+
+  <div class="card">
+    <h3>Ağ Durumu: <span id="netStatus" class="status-badge online">🟢 Çevrimiçi (Online)</span></h3>
+    <p>Tarayıcınızın Geliştirici Araçları'ndan (F12 > Network) "Offline" modunu açarak test edebilirsiniz.</p>
+  </div>
+
+  <div class="card">
+    <h3>IndexedDB Sipariş / İşlem Kuyruğu</h3>
+    <button id="addOrderBtn">🛒 Çevrimdışı Sipariş Ekle (Test)</button>
+    <button id="syncNowBtn" style="background: #059669; margin-left: 10px;">🔄 Manuel Senkronize Et</button>
+    <button id="clearQueueBtn" style="background: #e11d48; margin-left: 10px;">🗑️ Kuyruğu Temizle</button>
+
+    <h4 style="margin-top: 20px;">Kuyruk Durumu: <span id="queueCount">0</span> Bekleyen İstek</h4>
+    <pre id="queueOutput">// Bekleyen işlem yok</pre>
+  </div>
+
+  <script src="../dist/edge-offline.min.js"></script>
+  <script>
+    const netStatus = document.getElementById('netStatus');
+    const queueCount = document.getElementById('queueCount');
+    const queueOutput = document.getElementById('queueOutput');
+
+    function updateStatus() {
+      if (EdgeOffline.isOnline()) {
+        netStatus.className = 'status-badge online';
+        netStatus.textContent = '🟢 Çevrimiçi (Online)';
+      } else {
+        netStatus.className = 'status-badge offline';
+        netStatus.textContent = '🔴 Çevrimdışı (Offline)';
+      }
+    }
+
+    async function refreshQueueUI() {
+      const items = await EdgeOffline.getPendingItems();
+      queueCount.textContent = items.length;
+      queueOutput.textContent = items.length > 0 ? JSON.stringify(items, null, 2) : '// Kuyruk boş';
+    }
+
+    EdgeOffline.on('online', () => { updateStatus(); refreshQueueUI(); });
+    EdgeOffline.on('offline', () => { updateStatus(); });
+    EdgeOffline.on('queueChange', () => { refreshQueueUI(); });
+
+    document.getElementById('addOrderBtn').addEventListener('click', async () => {
+      await EdgeOffline.queueRequest({
+        action: 'SUBMIT_ORDER',
+        url: '/api/order',
+        data: {
+          id: 'ORD-' + Date.now(),
+          product: 'Maraş Kesme & Çıtır Waffle',
+          price: 195,
+          timestamp: new Date().toISOString()
+        }
+      });
+      alert('Sipariş IndexedDB kuyruğuna kaydedildi!');
+      refreshQueueUI();
+    });
+
+    document.getElementById('syncNowBtn').addEventListener('click', async () => {
+      await EdgeOffline.sync();
+      alert('Senkronizasyon işlemi tetiklendi.');
+      refreshQueueUI();
+    });
+
+    document.getElementById('clearQueueBtn').addEventListener('click', async () => {
+      await EdgeOffline.clearQueue();
+      refreshQueueUI();
+    });
+
+    updateStatus();
+    refreshQueueUI();
+  </script>
+</body>
+</html>
