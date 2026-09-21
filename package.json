@@ -1,9 +1,13 @@
 {
-  "name": "edge-offline",
-  "version": "2.2.0",
+  "name": "edge-offline-pack",
+  "version": "2.3.0",
   "description": "Universal Zero-Dependency Offline-First & Background Sync Engine for Modern Web & PWAs",
   "main": "dist/edge-offline.min.js",
   "module": "src/edge-offline.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kefy266/edge-offline-pack.git"
+  },
   "scripts": {
     "test": "node -c src/edge-offline.js"
   },
